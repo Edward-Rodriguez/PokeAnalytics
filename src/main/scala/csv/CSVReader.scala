@@ -1,5 +1,6 @@
-object HousingPrices extends App {
-  println("Zip Code, # of Beds, Year, Price")
+package csv
+
+object CSVReader extends App {
 
   val file = io.Source.fromFile("zillow.csv")
   for (line <- file.getLines()) {
