@@ -1,7 +1,7 @@
 package csv
 import scala.collection.mutable.Map
 import scala.collection.mutable.Buffer
-object CSVReader extends App {
+object pokeAnalytics extends App {
 
   case class Pokemon(
       pokedexNumber: Int,
