@@ -1,6 +1,4 @@
 package csv
-import scala.collection.mutable.Map
-import scala.collection.mutable.Buffer
 object pokeAnalytics extends App {
 
   case class Pokemon(
@@ -61,8 +59,8 @@ object pokeAnalytics extends App {
     */
   def searchPokemonForType(
       flag: String,
-      data: scala.collection.immutable.Map[Int, Pokemon]
-  ): scala.collection.immutable.Map[Int, Pokemon] = {
+      data: Map[Int, Pokemon]
+  ): Map[Int, Pokemon] = {
     data
       .filter(x =>
         (x._2.type1.toLowerCase == flag || x._2.type2.toLowerCase == flag)
@@ -70,8 +68,10 @@ object pokeAnalytics extends App {
       .toMap
   }
 
-  val newMap = searchPokemonForType(args(0).toLowerCase(), pokeMap)
-  if (!newMap.isEmpty) newMap.foreach(x => println(x._2.name))
-  else "No Pokemon of that type sorry . . ."
+  // WORKING PROGRESS . . .
+  if (args.length > 0) {
+    val newMap = searchPokemonForType(args(0).toLowerCase(), pokeMap)
+    newMap.foreach(x => println(x._2.name))
+  }
 
 }
