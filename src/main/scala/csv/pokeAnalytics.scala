@@ -47,7 +47,7 @@ object pokeAnalytics extends App {
   val pokeMap =
     file
       .getLines()
-      .drop(1)
+      .drop(1) //drop header row
       .map(line => convertRecordToPokemon(line.split(",")))
       .toMap
 
