@@ -1,4 +1,4 @@
-# CSVReader
+# Poke Analytics
 
 A simple project that extracts pokemon stats from a CSV file for analytics
 
@@ -40,7 +40,7 @@ Project was created with:
 
 - CLI that takes dataset as file input
 - Scala Map to map values from dataset as keys
-- CLI Flag to search for Pokemon types
+- CLI Flag to search for Pokemon by type
 - Outputs results to console
 <!-- - [ ] Aggregate and count (Reduce) all keys
 - [ ] Return list of counts
