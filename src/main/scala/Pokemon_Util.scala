@@ -16,7 +16,7 @@ object Pokemon_Util {
   private val BASE_STAT = "base_stat"
   private val POKEMON_TYPE = "type"
   private val POKEMON_SEARCH_RESULTS = "results"
-  private val NO_PARAM = ""
+  private val NO_SECOND_TYPE = "none"
 
   private def parseJSON(pokemonIDOrName: String): JsValue = {
     val src = Source.fromURL(s"$baseURL$pokemonIDOrName").mkString
@@ -28,17 +28,24 @@ object Pokemon_Util {
     val pokemon_name = (json \ STAT_NAME).get
     val pokemon_ID = (json \ POKEMON_ID).get
     val typesCategory = (json \ TYPES_CATEGORY).get
-    val type1 = (typesCategory \ 0 \ POKEMON_TYPE \ STAT_NAME).get
-    val type2 = (typesCategory.as[JsArray].value.size) match {
-      case 1 => JsString("None") // aka pokemon has no type2
-      case _ => (typesCategory \ 0 \ POKEMON_TYPE \ STAT_NAME).get
-    }
+    val type1 = getPokemonType(typesCategory, 1)
+    val type2 = getPokemonType(typesCategory, 2)
     val statsCategory = (json \ STATS_CATEGORY).get
     val statsList = ListBuffer(pokemon_ID, pokemon_name, type1, type2);
     for (statCol <- 0 to 5)
       statsList.addOne((statsCategory \ statCol \ BASE_STAT).get)
     statsList
   }
+
+  def getPokemonType(json: JsValue, typeNumber: Int): JsValue =
+    typeNumber match {
+      case 1 => (json \ 0 \ POKEMON_TYPE \ STAT_NAME).get
+      case 2 =>
+        (json.as[JsArray].value.size) match {
+          case 1 => JsString(NO_SECOND_TYPE)
+          case _ => (json \ 1 \ POKEMON_TYPE \ STAT_NAME).get
+        }
+    }
 
   def convertDataToPokemon(
       data: ListBuffer[JsValue]

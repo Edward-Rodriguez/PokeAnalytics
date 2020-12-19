@@ -54,6 +54,7 @@ object Project0 extends App {
     findPokemonWithHighestAttack().toSeq.sortBy(_.attack)(Ordering[Int].reverse)
   // println(s"${highestAttack.name} = ${highestAttack.attack}")
   highestAttack.foreach(x => println(s"${x.name} = ${x.attack}"))
+  highestAttack.foreach(println)
 
   val duration = (System.nanoTime - t1) / 1e9d
   println(s"Time it took to run: $duration secs")
