@@ -26,6 +26,9 @@ version := "1.0"
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2"
 libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.1.1"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.1"
+// libraryDependencies ++= Seq(
+//   "org.reactivemongo" %% "reactivemongo-play-json" % "0.20.13-play27"
+// )
 
 // Here, `libraryDependencies` is a set of dependencies, and by using `+=`,
 // we're adding the scala-parser-combinators dependency to the set of dependencies

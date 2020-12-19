@@ -19,7 +19,7 @@ Project was created with:
 
 ## Run
 
-> stb --error run
+> stb run
 
 <!-- # Requirements
 - [ ] Written in Scala/SBT
@@ -39,10 +39,11 @@ Project was created with:
 
 # Features
 
-- CLI that takes dataset as file input
-- Scala Map to map values from dataset as keys
-- CLI Flag to search for Pokemon by type
-- Outputs results to console
+- Retrieve data from an API
+- Scala Set to map values from dataset as keys
+- Search for Pokemon by type Attack
+- Outputs results to mongo db  
+** MORE TO COME **
 <!-- - [ ] Aggregate and count (Reduce) all keys
 - [ ] Return list of counts
 - [ ] Well documented and extensive code coverage with unit tests
