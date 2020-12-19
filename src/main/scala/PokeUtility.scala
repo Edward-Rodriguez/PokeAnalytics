@@ -5,7 +5,7 @@ import scala.io.Source
 import play.api.libs.functional.syntax._
 import scala.collection.mutable.ListBuffer
 
-object Pokemon_Util {
+object PokeUtility {
 
   private val baseURL = "https://pokeapi.co/api/v2/pokemon/"
   // CONSTANTS

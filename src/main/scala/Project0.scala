@@ -8,12 +8,12 @@ import scala.concurrent.duration.Duration
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Future
 import Pokemon._
-import Pokemon_Util._
+import PokeUtility._
 import scala.io.StdIn.readInt
 
 object Project0 extends App {
   val t1 = System.nanoTime
-  val pokeAPI = Pokemon_Util
+  val pokeAPI = PokeUtility
 
   val pokemonCollection: Set[Pokemon] = pokeAPI.getPokemonCollection(20)
   //pokemonCollection.foreach(println)

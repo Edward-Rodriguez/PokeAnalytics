@@ -15,12 +15,13 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
 class PokemonDao(mongoClient: MongoClient) {
+  val DATABASE_NAME = "pokemon"
   val pokemonCodecRegistry =
     fromRegistries(fromProviders(classOf[Pokemon], DEFAULT_CODEC_REGISTRY))
 
   val db =
     mongoClient
-      .getDatabase("pokemon")
+      .getDatabase(DATABASE_NAME)
       .withCodecRegistry(pokemonCodecRegistry)
 
   def insertCollectionIntoDatabase(
