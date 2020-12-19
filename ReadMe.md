@@ -1,6 +1,6 @@
 # Poke Analytics
 
-A simple project that extracts pokemon stats from a CSV file for analytics
+A simple project that extracts pokemon stats from the PokeAPI for analytics
 
 ## Technologies
 
@@ -8,6 +8,7 @@ Project was created with:
 
 - SBT version 1.4.4
 - Scala version 2.12
+- Play JSON 2.9.1
 
 ## Compile
 
