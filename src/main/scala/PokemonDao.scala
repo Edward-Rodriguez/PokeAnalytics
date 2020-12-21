@@ -1,19 +1,17 @@
 package scala
 
-import org.mongodb.scala.MongoClient
+import org.mongodb.scala.{MongoClient, MongoCollection}
 import org.mongodb.scala.bson.codecs.Macros._
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import org.mongodb.scala.Observable
+import scala.concurrent.duration.{Duration, SECONDS}
+import scala.util.{Success, Failure}
 import org.bson.codecs.configuration.CodecRegistries.{
   fromProviders,
   fromRegistries
 }
-import org.mongodb.scala.MongoCollection
-import scala.concurrent.Future
-import org.mongodb.scala.Observable
-import scala.concurrent.Await
-import scala.concurrent.duration.{Duration, SECONDS}
-
 class PokemonDao(mongoClient: MongoClient) {
   val DATABASE_NAME = "pokemon"
   val pokemonCodecRegistry =
@@ -30,8 +28,23 @@ class PokemonDao(mongoClient: MongoClient) {
   ) {
     val collection: MongoCollection[Pokemon] =
       db.getCollection(nameOfCollection)
-    val query = collection.insertMany(data)
-    Await.result(query.toFuture(), Duration(10, SECONDS))
+    collection
+      .insertMany(data)
+      .toFuture()
+      .recoverWith { case e: Throwable => { println(e); Future.failed(e) } }
+      .map(_ => {})
   }
+
+  def getAllPokemonFromCollection(nameOfCollection: String) {
+    val collection: MongoCollection[Pokemon] =
+      db.getCollection(nameOfCollection)
+    collection.find()
+  }
+
+  // def postResult(criteria: String) {
+  //   val collection: MongoCollection[Pokemon] =
+  //     db.getCollection(nameOfCollection)
+  //   collection.find(filter)
+  // }
 
 }

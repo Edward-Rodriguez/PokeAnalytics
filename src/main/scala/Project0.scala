@@ -1,40 +1,46 @@
 package scala
 
-import java.util.HashSet
 import org.mongodb.scala._
-import scala.collection.JavaConverters._
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-import java.util.concurrent.TimeUnit
 import scala.concurrent.Future
-import Pokemon._
-import PokeUtility._
-import scala.io.StdIn.readInt
-
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Success, Failure}
 object Project0 extends App {
   val t1 = System.nanoTime
-  val pokeAPI = PokeUtility
 
-  val pokemonCollection: Set[Pokemon] = pokeAPI.getPokemonCollection(20)
-  //pokemonCollection.foreach(println)
+  val pokeAPI = PokeUtility
+  val pokemonList = Future {
+    for (pokedexNumber <- 1 to 50) yield pokeAPI.getPokemon(pokedexNumber)
+  }
 
   val mongoClient = MongoClient()
   val pokemonDao = new PokemonDao(mongoClient)
 
-  // collection
-  //   .find()
-  //   .subscribe((doc: Document) => println(doc.toJson()))
-
-  // Matches pokemon who's attack >= `minAttack`.
-  def findPokemonByAttackGT(minAttack: Int): Set[Pokemon] = {
-    pokemonCollection.filter(_.attack >= minAttack)
+  pokemonList.onComplete {
+    case Success(value) => {
+      pokemonDao.insertCollectionIntoDatabase("Pokemon", value)
+    }
+    case Failure(ex) => println(ex)
   }
-  val results =
-    findPokemonByAttackGT(50).toSeq.sortBy(_.attack)(
-      Ordering[Int].reverse
-    )
-  // println(s"${highestAttack.name} = ${highestAttack.attack}")
-  pokemonDao.insertCollectionIntoDatabase("Attack", results)
+
+  def getTopAttackers(quantity: Int) {
+    val size = pokemonList.map(_.size)
+    size.onComplete {
+      case Failure(ex) => println(ex)
+      case Success(value) => {
+        pokemonList
+          .map(
+            _.sortBy(_.attack)(Ordering[Int].reverse).dropRight(value - 20)
+          )
+          .onComplete {
+            case Failure(ex) => println(ex)
+            case Success(result) =>
+              pokemonDao.insertCollectionIntoDatabase("TopAttackers", result)
+          }
+      }
+    }
+  }
+
+  getTopAttackers(20)
 
   val duration = (System.nanoTime - t1) / 1e9d
   println(s"Time it took to run: $duration secs")

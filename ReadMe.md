@@ -40,8 +40,8 @@ Project was created with:
 # Features
 
 - Retrieve data from an API
-- Scala Set to map values from dataset as keys
-- Search for Pokemon by type Attack
+- Concurrent/ Parallel implementation for faster results
+- Search for Pokemon by highest type Attack
 - Outputs results to mongo db  
 ** MORE TO COME **
 <!-- - [ ] Aggregate and count (Reduce) all keys
