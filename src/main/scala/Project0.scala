@@ -29,7 +29,8 @@ object Project0 extends App {
       case Success(value) => {
         pokemonList
           .map(
-            _.sortBy(_.attack)(Ordering[Int].reverse).dropRight(value - 20)
+            _.sortBy(_.attack)(Ordering[Int].reverse)
+              .dropRight(value - quantity)
           )
           .onComplete {
             case Failure(ex) => println(ex)
