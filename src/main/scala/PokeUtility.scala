@@ -15,12 +15,25 @@ object PokeUtility {
   private val POKEMON_SEARCH_RESULTS = "results"
   private val NO_SECOND_TYPE = "none"
 
+  /** Parses a String representing a JSON input and returns a JsValue
+    *
+    * Downloads the contents of the Pokemon endpoint into a string and converts
+    * it to a JsValue
+    * @param pokemonIDOrName Resource ID of API endpoint you want to parse
+    * @return JsValue of parsed JSON String
+    */
   private def parseJSON(pokemonIDOrName: Int): JsValue = {
     val src = Source.fromURL(s"$baseURL$pokemonIDOrName").mkString
     Json.parse(src)
   }
 
-  def getPokemonStats(pokemonIdOrName: Int): List[JsValue] = {
+  /** Returns a List of Pokemon Stats
+    *
+    * Parses JSON and stores relevant data into a List
+    * @param pokemonIdOrName Resource ID of API endpoint to fetch
+    * @return List of JsValue's representing the pokemon stats
+    */
+  private def getPokemonStats(pokemonIdOrName: Int): List[JsValue] = {
     val json = parseJSON(pokemonIdOrName)
     val pokemon_name = (json \ STAT_NAME).get
     val pokemon_ID = (json \ POKEMON_ID).get
@@ -35,6 +48,7 @@ object PokeUtility {
     statsList ++ tempStatList
   }
 
+  // Parses JSON and Returns `Type` of Pokemon as a JsValue
   private def getPokemonType(json: JsValue, typeNumber: Int): JsValue =
     typeNumber match {
       case 1 => (json \ 0 \ POKEMON_TYPE \ STAT_NAME).get
@@ -45,7 +59,14 @@ object PokeUtility {
         }
     }
 
-  def convertDataToPokemon(
+  /** Returns object of type Pokemon with populated fields
+    *
+    * Converts list of stats into relevant field types and returns
+    * an object of type Pokemon
+    * @param data List of stats to be inserted into a Pokemon
+    * @return Pokemon
+    */
+  private def convertDataToPokemon(
       data: List[JsValue]
   ): Pokemon = {
     Pokemon(
@@ -63,6 +84,7 @@ object PokeUtility {
     )
   }
 
+  // Returns a Pokemon that has been fetched and converted
   def getPokemon(pokedexNumber: Int): Pokemon = {
     convertDataToPokemon(getPokemonStats(pokedexNumber))
   }

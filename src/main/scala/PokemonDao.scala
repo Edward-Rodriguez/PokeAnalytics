@@ -32,7 +32,7 @@ class PokemonDao(mongoClient: MongoClient) {
       .insertMany(data)
       .toFuture()
       .recoverWith { case e: Throwable => { println(e); Future.failed(e) } }
-      .map(_ => {})
+    //.map(_ => {}) //
   }
 
   def getAllPokemonFromCollection(nameOfCollection: String) {
