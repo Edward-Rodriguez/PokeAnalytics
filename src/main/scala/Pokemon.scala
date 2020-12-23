@@ -4,7 +4,7 @@ import org.bson.types.ObjectId
 /** Factory for Pokemon instances */
 object Pokemon {
 
-  /** Creates a pokemon with a given stats
+  /** Creates a pokemon with given stats
     *
     * @param id for _id field in mongo db
     * id field = pokedex number

@@ -4,14 +4,13 @@ import org.mongodb.scala._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Failure}
-import play.api.libs.json.JsTrue
 import scala.util.Try
 
 /** Fetches resources from PokeAPI for a given amount of Pokemon
-  * Performs some analysis and uploads stores into database
+  * Performs some analysis and uploads to database
   */
 object Project0 extends App {
-  val t1 = System.nanoTime
+
   // constants
   val FIRST_GEN = "1st Generation (#1-151)"
   val SECOND_GEN = "2nd Generation (#1-251)"
@@ -22,28 +21,38 @@ object Project0 extends App {
   val SEVENTH_GEN = "7th Generation (#1-809)"
 
   // Welcome screen
-  Console.println(
+  println(
     "\u001b[2J" + "\u001b[H" + // clear screen
       "Welcome to Poke Analytics! \n" +
-      "Choose the Generation of Pokemon you want to analyze:"
+      "Choose the Generation of Pokemon you want to analyze:\n"
   )
-  Console.println(
-    s"[1]: $FIRST_GEN\n[2]: $SECOND_GEN\n[3]: $THIRD_GEN\n" +
-      s"[4]: $FOURTH_GEN\n[5]: $FIFTH_GEN\n[6]: $SIXTH_GEN\n" +
+  println(
+    s"[1]: $FIRST_GEN\n\n[2]: $SECOND_GEN\n\n[3]: $THIRD_GEN\n\n" +
+      s"[4]: $FOURTH_GEN\n\n[5]: $FIFTH_GEN\n\n[6]: $SIXTH_GEN\n\n" +
       s"[7]: $SEVENTH_GEN\n"
   )
 
-  val userGenChoice = getUserInput(7)
+  val userInput = getUserInput(7)
+
+  val userGenChoice: Int = userInput match {
+    case 1 => 151
+    case 2 => 251
+    case 3 => 386
+    case 4 => 493
+    case 5 => 649
+    case 6 => 721
+    case 7 => 809
+  }
+
   val pokeAPI = PokeUtility
   val pokemonList = Future {
     for (pokedexNumber <- 1 to userGenChoice)
       yield pokeAPI.getPokemon(pokedexNumber)
   }
-
   val mongoClient = MongoClient()
   val pokemonDao = new PokemonDao(mongoClient)
 
-  // Posts entire pokemon list to db when future completes
+  //Posts entire pokemon list to db when future completes
   pokemonList.onComplete {
     case Success(value) => {
       pokemonDao.insertCollectionIntoDatabase("Pokemon", value)
@@ -51,8 +60,7 @@ object Project0 extends App {
     case Failure(ex) => println(ex)
   }
 
-  // Options screen
-  val genChoice: String = userGenChoice match {
+  val genChoice: String = userInput match {
     case 1 => FIRST_GEN
     case 2 => SECOND_GEN
     case 3 => THIRD_GEN
@@ -61,21 +69,33 @@ object Project0 extends App {
     case 6 => SIXTH_GEN
     case 7 => SEVENTH_GEN
   }
-  Console.println(
-    s"Great! You chose to analyze pokemon from the $genChoice\n" +
-      "What would you like to do?:"
+
+  // Options screen
+  println(
+    "\u001b[2J" + "\u001b[H" + // clear screen
+      s"Great! You chose to analyze pokemon from the $genChoice\n\n" +
+      "What would you like to do?:\n"
   )
-  Console.println(
-    "[1]: Get Pokemon with the highest Attack \n" +
-      "[2]: COMING SOON ... \n" +
-      "[3]: COMING SOON ... \n"
+  println(
+    "[1]: Get Top (n) Pokemon with the highest Attack \n\n" +
+      "[2]: Get Top (n) Pokemon with the highest Defense \n"
   )
 
-  val userChoice = getUserInput(1)
+  val userOptionChoice = getUserInput(2);
+  print("\nEnter a value for (n): ")
+  val quantityOfPokemon = getUserInput(userGenChoice);
+
+  val results = userOptionChoice match {
+    case 1 => getTopAttackers(quantityOfPokemon)
+    case 2 => getTopDefenders(quantityOfPokemon)
+    case _ => {}
+  }
+
+  print("Results have been uploaded to db . . . \n\n\n ")
 
   /** Returns a valid user Input
     * Recursive calls until valid user input
-    * @param limit max number user can input
+    * @param limit max number a user can input
     */
   private def getUserInput(limit: Int): Int = scala.io.StdIn.readLine match {
     case choice if Try(choice.toInt).isSuccess => {
@@ -85,7 +105,11 @@ object Project0 extends App {
     case _ => invalidOption(limit)
   }
 
-  /** Sorts the list of Pokemon by highest attackers
+  def isValidUserInput(userInput: String): Boolean = {
+    Try(userInput.toInt).isSuccess
+  }
+
+  /** Sorts the list of Pokemon by highest attack
     * and outputs the nth top attackers to the
     * `TopAttackers` collection in the pokemon db
     *
@@ -104,7 +128,32 @@ object Project0 extends App {
           .onComplete {
             case Failure(ex) => println(ex)
             case Success(result) =>
-              pokemonDao.insertCollectionIntoDatabase("TopAttackers", result)
+              pokemonDao.insertCollectionIntoDatabase("HighestAttack", result)
+          }
+      }
+    }
+  }
+
+  /** Sorts the list of Pokemon by highest defense
+    * and outputs the nth top defenders to the
+    * `TopAttackers` collection in the pokemon db
+    *
+    * @param quantity top nth Attackers to output
+    */
+  def getTopDefenders(quantity: Int) {
+    val size = pokemonList.map(_.size)
+    size.onComplete {
+      case Failure(ex) => println(ex)
+      case Success(value) => {
+        pokemonList
+          .map(
+            _.sortBy(_.defense)(Ordering[Int].reverse)
+              .dropRight(value - quantity)
+          )
+          .onComplete {
+            case Failure(ex) => println(ex)
+            case Success(result) =>
+              pokemonDao.insertCollectionIntoDatabase("HighestDefense", result)
           }
       }
     }
@@ -114,8 +163,5 @@ object Project0 extends App {
     println(s"Please choose an option from 1 - $limit")
     getUserInput(limit)
   }
-
-  val duration = (System.nanoTime - t1) / 1e9d
-  println(s"Time it took to run: $duration secs")
 
 }
