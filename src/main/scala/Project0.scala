@@ -23,7 +23,7 @@ object Project0 extends App {
   // Welcome screen
   println(
     "\u001b[2J" + "\u001b[H" + // clear screen
-      "Welcome to Poke Analytics! \n" +
+      "\nWelcome to Poke Analytics! \n" +
       "Choose the Generation of Pokemon you want to analyze:\n"
   )
   println(
@@ -55,7 +55,7 @@ object Project0 extends App {
   //Posts entire pokemon list to db when future completes
   pokemonList.onComplete {
     case Success(value) => {
-      pokemonDao.insertCollectionIntoDatabase("Pokemon", value)
+      pokemonDao.insertCollectionIntoDatabase("pokemon", value)
     }
     case Failure(ex) => println(ex)
   }
@@ -82,7 +82,14 @@ object Project0 extends App {
   )
 
   val userOptionChoice = getUserInput(2);
-  print("\nEnter a value for (n): ")
+
+  val statChosen: String = userOptionChoice match {
+    case 1 => "Attack"
+    case 2 => "Defense"
+  }
+  println(s"\nYou chose Top (n) Pokemon with the highest $statChosen")
+
+  print("\nPlease enter a value for (n): ")
   val quantityOfPokemon = getUserInput(userGenChoice);
 
   val results = userOptionChoice match {
@@ -91,13 +98,13 @@ object Project0 extends App {
     case _ => {}
   }
 
-  print("Results have been uploaded to db . . . \n\n\n ")
+  print("\nResults have been uploaded to db! \n\n\n")
 
   /** Returns a valid user Input
     * Recursive calls until valid user input
     * @param limit max number a user can input
     */
-  private def getUserInput(limit: Int): Int = scala.io.StdIn.readLine match {
+  private def getUserInput(limit: Int): Int = scala.io.StdIn.readLine() match {
     case choice if Try(choice.toInt).isSuccess => {
       if (1 to limit contains choice.toInt) choice.toInt
       else invalidOption(limit)
@@ -115,7 +122,7 @@ object Project0 extends App {
     *
     * @param quantity top nth Attackers to output
     */
-  def getTopAttackers(quantity: Int) {
+  def getTopAttackers(quantity: Int): Unit = {
     val size = pokemonList.map(_.size)
     size.onComplete {
       case Failure(ex) => println(ex)
@@ -128,7 +135,10 @@ object Project0 extends App {
           .onComplete {
             case Failure(ex) => println(ex)
             case Success(result) =>
-              pokemonDao.insertCollectionIntoDatabase("HighestAttack", result)
+              pokemonDao.insertCollectionIntoDatabase(
+                "highestattackers",
+                result
+              )
           }
       }
     }
@@ -140,7 +150,7 @@ object Project0 extends App {
     *
     * @param quantity top nth Attackers to output
     */
-  def getTopDefenders(quantity: Int) {
+  def getTopDefenders(quantity: Int): Unit = {
     val size = pokemonList.map(_.size)
     size.onComplete {
       case Failure(ex) => println(ex)
@@ -153,14 +163,17 @@ object Project0 extends App {
           .onComplete {
             case Failure(ex) => println(ex)
             case Success(result) =>
-              pokemonDao.insertCollectionIntoDatabase("HighestDefense", result)
+              pokemonDao.insertCollectionIntoDatabase(
+                "highestdefenders",
+                result
+              )
           }
       }
     }
   }
 
   private def invalidOption(limit: Int): Int = {
-    println(s"Please choose an option from 1 - $limit")
+    println(s"Please choose a value from 1 - $limit")
     getUserInput(limit)
   }
 

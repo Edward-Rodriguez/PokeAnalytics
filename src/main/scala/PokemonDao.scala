@@ -17,7 +17,7 @@ import org.bson.codecs.configuration.CodecRegistries.{
 }
 import org.mongodb.scala.FindObservable
 class PokemonDao(mongoClient: MongoClient) extends LazyLogging {
-  val DATABASE_NAME = "pokemon"
+  val DATABASE_NAME = "myPokemonDB"
   val pokemonCodecRegistry =
     fromRegistries(fromProviders(classOf[Pokemon], DEFAULT_CODEC_REGISTRY))
 
@@ -29,7 +29,8 @@ class PokemonDao(mongoClient: MongoClient) extends LazyLogging {
   def insertCollectionIntoDatabase(
       nameOfCollection: String,
       data: Seq[Pokemon]
-  ) {
+  ): Unit = {
+    db.getCollection(nameOfCollection).drop() // drop it if exists
     val collection: MongoCollection[Pokemon] =
       db.getCollection(nameOfCollection)
     collection
@@ -38,33 +39,30 @@ class PokemonDao(mongoClient: MongoClient) extends LazyLogging {
       .recoverWith { case e: Throwable => { println(e); Future.failed(e) } }
   }
 
-  def getAllPokemonFromCollection(nameOfCollection: String) {
+  def getAllPokemonFromCollection(nameOfCollection: String): Unit = {
     val collection: MongoCollection[Pokemon] =
       db.getCollection(nameOfCollection)
     collection.find()
   }
 
-  def getAndPostPokemonByStat(
-      nameOfCollection: String,
-      stat: String,
-      limit: Int
-  ) {
-    val collection: MongoCollection[Pokemon] =
-      db.getCollection("Pokemon")
-    val results = collection
-      .find()
-      .projection(include("podexNumber", "name", stat))
-      .sort(descending(stat))
-      .limit(limit)
-  }
-
-  // private def postCollection(
-  //     data: FindObservable[Pokemon],
-  //     nameOfCollection: String
-  // ) {
+  // /** COMING SOON ...
+  //   *
+  //   * @param nameOfCollection
+  //   * @param stat
+  //   * @param limit
+  //   */
+  // def getAndPostPokemonByStat(
+  //     nameOfCollection: String,
+  //     stat: String,
+  //     limit: Int
+  // ): Unit = {
   //   val collection: MongoCollection[Pokemon] =
-  //     db.getCollection(nameOfCollection)
-  //   collection.insertOne(data)
+  //     db.getCollection("pokemon")
+  //   val results = collection
+  //     .find()
+  //     .projection(include("podexNumber", "name", stat))
+  //     .sort(descending(stat))
+  //     .limit(limit)
   // }
 
 }
