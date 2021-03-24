@@ -12,11 +12,11 @@ class S3Dao {
   val s3: AmazonS3 =
     AmazonS3ClientBuilder.defaultClient()
   val BUCKET_NAME: String = "pokeanalytics-data"
-  val DATA_WAREHOUSE: String = "datawarehouse"
+  val DATA_WAREHOUSE: String = "DATAWAREHOUSE/"
   val localWarehouse: String = ""
   val locaLakePath: String = ""
 
-  downloadFromBucket("test")
+  downloadFromBucket("employee_info.csv")
 
   // download file from S3 and write to local file
   def downloadFromBucket(filename: String): Unit = {
@@ -25,23 +25,32 @@ class S3Dao {
       DATA_WAREHOUSE,
       BUCKET_NAME
     )
+    var s3Object = None: Option[S3Object]
+    var s3InputStream = None: Option[S3ObjectInputStream]
+    var fos = None: Option[FileOutputStream]
     try {
-      val s3Object: S3Object = s3.getObject(BUCKET_NAME, DATA_WAREHOUSE)
-      val s3InputStream: S3ObjectInputStream = s3Object.getObjectContent()
-      val fos: FileOutputStream =
-        new FileOutputStream(new File(DATA_WAREHOUSE));
-      var read_buf = Array[Byte]()
-      var read_len: Int = s3InputStream.read(read_buf)
+      s3Object = Some(s3.getObject(BUCKET_NAME, DATA_WAREHOUSE + filename))
+      s3InputStream = Some(s3Object.get.getObjectContent())
+      fos = Some(new FileOutputStream(new File(filename)));
+      var read_buf = new Array[Byte](1024)
+      var read_len: Int = s3InputStream.get.read(read_buf)
+      println("read_len = " + read_len)
       while (read_len > 0) {
-        fos.write(read_buf, 0, read_len);
-        read_len = s3InputStream.read(read_buf)
+        println("Hello there..")
+        fos.get.write(read_buf, 0, read_len);
+        read_len = s3InputStream.get.read(read_buf)
       }
-      s3InputStream.close()
-      fos.close()
+
     } catch {
       case e: Throwable => {
         println(e.getMessage())
         System.exit(1)
+      }
+    } finally {
+      if (s3Object.get != null) {
+        s3InputStream.get.abort()
+        s3Object.get.close()
+        fos.get.close()
       }
     }
   }
